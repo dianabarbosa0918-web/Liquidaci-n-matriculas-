@@ -101,6 +101,13 @@
   .lineitem .v{font-family:"Geist Mono",monospace;font-size:18px;font-weight:500;white-space:nowrap}
   .sub{margin:6px 0 2px;font-family:"Geist Mono",monospace;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600}
 
+  /* Línea destacada (valor final timbre) */
+  .lineitem.highlight{margin-top:8px;padding:12px 14px;border:1.5px solid var(--accent);
+    background:var(--teal-soft);border-radius:11px;border-bottom:1.5px solid var(--accent)}
+  .lineitem.highlight .k{color:var(--accent-2);font-size:17px}
+  .lineitem.highlight .k b{font-weight:700}
+  .lineitem.highlight .v{color:var(--accent-2);font-size:21px;font-weight:700}
+
   .total{margin-top:16px;border-radius:14px;padding:17px 19px;border:1px solid var(--line)}
   .total.sin{background:#fff}
   .total.con{background:var(--ink);border-color:var(--ink);margin-top:12px}
@@ -199,7 +206,7 @@
           <div class="lineitem"><span class="k">Valor anual <small id="rTimbrePct"></small></span><span class="v" id="rTimbreBase">—</span></div>
           <div class="lineitem"><span class="k">Valor por fracción de meses <small id="rMesesDet"></small></span><span class="v" id="rTimbreMeses">—</span></div>
           <div class="lineitem"><span class="k">Valor por fracción de días <small id="rDiasDet"></small></span><span class="v" id="rTimbreDias">—</span></div>
-          <div class="lineitem"><span class="k"><b>Valor final timbre</b></span><span class="v" id="rTimbreFinal" style="font-weight:600">—</span></div>
+          <div class="lineitem highlight"><span class="k"><b>Valor final timbre</b></span><span class="v" id="rTimbreFinal">—</span></div>
 
           <div class="sub" style="margin-top:14px">Otros conceptos</div>
           <div class="lineitem"><span class="k">Matrícula sede <small id="rSedeDet"></small></span><span class="v" id="rSede">—</span></div>
@@ -263,12 +270,12 @@
   ];
   var SOATS = [
     {n:"Sin SOAT", v:0},
-    {n:"AUTOMOVIL", v:544700},
-    {n:"KICKS", v:946600},
-    {n:"FRONTIER", v:946600},
+    {n:"VERSA Y SENTRA", v:544700},
+    {n:"KICKS 2.0 Y KAIT", v:946600},
+    {n:"FRONTIER GSL/DSL", v:946600},
     {n:"QASHQAI", v:792800},
     {n:"XTRAIL", v:797300},
-    {n:"PATFAINDER", v:1067300}
+    {n:"PATHFINDER", v:1067300}
   ];
   // Rangos de timbre según valor SIN IVA
   var RANGOS = [
@@ -395,3 +402,4 @@
 </script>
 </body>
 </html>
+            
