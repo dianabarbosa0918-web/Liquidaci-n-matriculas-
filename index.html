@@ -101,7 +101,7 @@
   .lineitem .v{font-family:"Geist Mono",monospace;font-size:18px;font-weight:500;white-space:nowrap}
   .sub{margin:6px 0 2px;font-family:"Geist Mono",monospace;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600}
 
-  /* Línea destacada (valor final timbre) */
+  /* Línea destacada (valor final timbre (Impuestos) ) */
   .lineitem.highlight{margin-top:8px;padding:12px 14px;border:1.5px solid var(--accent);
     background:var(--teal-soft);border-radius:11px;border-bottom:1.5px solid var(--accent)}
   .lineitem.highlight .k{color:var(--accent-2);font-size:17px}
@@ -116,6 +116,13 @@
   .total .amt{font-family:"Geist Mono",monospace;font-weight:600;font-size:clamp(28px,5vw,36px);letter-spacing:-.02em;margin-top:4px}
   .total.con .amt{color:#fff}
   .total.con .amt em{font-style:normal;color:#f0a76e}
+
+  .soat-hint{display:flex;align-items:flex-start;gap:10px;margin-top:12px;padding:13px 15px;
+    border:1.5px dashed var(--amber);background:var(--amber-soft);border-radius:12px;
+    font-size:15px;line-height:1.45;color:#7a3a13}
+  .soat-hint .ico{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--amber);color:#fff;
+    display:grid;place-items:center;font-weight:700;font-size:18px;line-height:1}
+  .soat-hint b{color:var(--amber)}
 
   footer{margin-top:26px;text-align:center;font-family:"Geist Mono",monospace;font-size:13px;color:var(--ink-soft);letter-spacing:.04em}
 </style>
@@ -141,7 +148,7 @@
         <div class="panel-body">
           <label class="field big-input">
             <span class="lab">Valor del vehículo facturado</span>
-            <input type="number" id="valorFacturado" placeholder="0" min="0" step="1000" value="84990000">
+            <input type="text" inputmode="numeric" id="valorFacturado" placeholder="0" value="84.990.000">
           </label>
 
           <label class="field" style="margin-bottom:0">
@@ -216,6 +223,10 @@
             <span class="lbl">Valor total matrícula sin SOAT</span>
             <div class="amt" id="rTotalSin">—</div>
           </div>
+          <div class="soat-hint" id="soatHint">
+            <span class="ico">＋</span>
+            <span>Si quiere incluir el valor del SOAT, marque o despliegue la opción en el <b>numeral 3 · Sede y servicio</b>.</span>
+          </div>
           <div class="total con" id="boxCon" style="display:none">
             <span class="lbl">Valor total matrícula incluido SOAT <span id="rSoatLbl" style="text-transform:none;letter-spacing:0;font-weight:500"></span></span>
             <div class="amt"><em id="rTotalCon">—</em></div>
@@ -245,7 +256,6 @@
     {n:"NEW KAIT", iva:0.27},
     {n:"NEW KICKS", iva:0.27},
     {n:"NEW QASHQAI", iva:0.27},
-    {n:"NEW QASHQAI e-Power", iva:0.05},
     {n:"NEW X-TRAIL e-Power", iva:0.05},
     {n:"PATHFINDER", iva:0.27},
     {n:"AMBULANCIAS/OTROS", iva:0.16}
@@ -271,12 +281,12 @@
   ];
   var SOATS = [
     {n:"Sin SOAT", v:0},
-    {n:"VERSA Y SENTRA", v:544700},
-    {n:"KICKS 2.0 Y KAIT", v:946600},
-    {n:"FRONTIER GSL/DSL", v:946600},
+    {n:"AUTOMOVIL", v:544700},
+    {n:"KICKS", v:946600},
+    {n:"FRONTIER", v:946600},
     {n:"QASHQAI", v:792800},
     {n:"XTRAIL", v:797300},
-    {n:"PATHFINDER", v:1067300}
+    {n:"PATFAINDER", v:1067300}
   ];
   // Rangos de timbre según valor SIN IVA
   var RANGOS = [
@@ -289,6 +299,8 @@
   var $ = function(id){ return document.getElementById(id); };
   var cop = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
   var money = function(n){ return (isFinite(n)&&n>0) ? cop.format(Math.round(n)) : "$0"; };
+  function soloDigitos(s){ return (s||"").replace(/[^\d]/g,""); }
+  function fmtMiles(s){ var d=soloDigitos(s); return d ? Number(d).toLocaleString('es-CO') : ""; }
 
   function fill(sel, arr){
     arr.forEach(function(o,i){
@@ -335,7 +347,7 @@
 
   // ---- Cálculo principal ----
   function calc(){
-    var valor = parseFloat($('valorFacturado').value)||0;
+    var valor = parseFloat(soloDigitos($('valorFacturado').value))||0;
     var ref   = REFERENCIAS[parseInt($('referencia').value,10)];
     var iva   = ref.iva;
     var sinIva = valor>0 ? valor/(1+iva) : 0;
@@ -385,22 +397,38 @@
     $('rTotalSin').textContent  = money(totalSin);
     if(soat.v>0){
       $('boxCon').style.display = "";
+      $('soatHint').style.display = "none";
       $('rSoatLbl').textContent = "· "+soat.n;
       $('rTotalCon').textContent = money(totalCon);
     } else {
       $('boxCon').style.display = "none";
+      $('soatHint').style.display = "";
     }
   }
 
   // ---- Listeners ----
   $('fecha').addEventListener('input', function(){ setMesesDiasFromDate(); calc(); });
-  ['valorFacturado','referencia','sede','servicio','soat'].forEach(function(id){
+
+  // valor del vehículo: reformatea con puntos de miles mientras se escribe
+  $('valorFacturado').addEventListener('input', function(){
+    var el=this, d=soloDigitos(el.value);
+    el.value = d ? Number(d).toLocaleString('es-CO') : "";
+    // mantener el cursor al final (suficiente para este campo)
+    try{ el.setSelectionRange(el.value.length, el.value.length); }catch(e){}
+    calc();
+  });
+
+  ['referencia','sede','servicio','soat'].forEach(function(id){
     $(id).addEventListener('input', calc);
   });
+
+  // normalizar el valor inicial por si viene sin puntos
+  $('valorFacturado').value = fmtMiles($('valorFacturado').value);
 
   calc();
 })();
 </script>
 </body>
 </html>
+
             
